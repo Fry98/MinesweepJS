@@ -1,0 +1,20 @@
+body{
+	background-color: crimson;
+	text-align: center;
+}
+
+input{
+	margin-bottom: 15px;
+}
+
+h1{
+	font-family: 'Montserrat';
+	font-size: 80px;
+	margin-top: 0px;
+	color: white;
+	margin-bottom: 0px;
+}
+
+#playfield{
+	margin-top: 0px;
+}
