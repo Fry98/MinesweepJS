@@ -56,8 +56,8 @@ window.onload = ()=>{
 			let rect = canv.getBoundingClientRect();
 			let mouseX = event.clientX - rect.left;
 			let mouseY = event.clientY - rect.top;
-			let cellX = (mouseX - (mouseX%30))/30;
-			let cellY = (mouseY - (mouseY%30))/30;
+			let cellX = Math.floor(mouseX / 30);
+			let cellY = Math.floor(mouseY / 30);
 			if(field[cellX][cellY] === 9 && !firstRound){
 				field[cellX][cellY] = 10;
 				overlay[cellX][cellY] = 1;
@@ -87,8 +87,8 @@ window.onload = ()=>{
 			let rect = canv.getBoundingClientRect();
 			let mouseX = event.clientX - rect.left;
 			let mouseY = event.clientY - rect.top;
-			let cellX = (mouseX - (mouseX%30))/30;
-			let cellY = (mouseY - (mouseY%30))/30;
+			let cellX = Math.floor(mouseX / 30);
+			let cellY = Math.floor(mouseY / 30);
 			switch(overlay[cellX][cellY]){
 				case 0:
 					overlay[cellX][cellY] = 2;
