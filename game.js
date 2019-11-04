@@ -207,12 +207,12 @@ function imageLoadCallback() {
     ctx.fillRect(0, 0, canv.width, canv.height);
     ctx.font = 'bold 45px Arial';
     ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
+    ctx.textBaseline = 'middle';
     ctx.fillStyle = 'rgb(255, 27, 27)';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-		ctx.shadowOffsetX = 2;
-		ctx.shadowOffsetY = 2;
-		ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.shadowBlur = 2;
     ctx.fillText('YOU WIN!', canv.width / 2, canv.height / 2);
   }
 
