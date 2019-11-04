@@ -1,214 +1,227 @@
-var imgBlank = new Image()
-imgBlank.src = './UI/blank.png';
-var imgFlag = new Image();
-imgFlag.src = './UI/flag.png';
-var img0 = new Image();
-img0.src = './UI/0.png';
-var img1 = new Image();
-img1.src = './UI/1.png';
-var img2 = new Image();
-img2.src = './UI/2.png';
-var img3 = new Image();
-img3.src = './UI/3.png';
-var img4 = new Image();
-img4.src = './UI/4.png';
-var img5 = new Image();
-img5.src = './UI/5.png';
-var img6 = new Image();
-img6.src = './UI/6.png';
-var img7 = new Image();
-img7.src = './UI/7.png';
-var img8 = new Image();
-img8.src = './UI/8.png';
-var img9 = new Image();
-img9.src = './UI/otherBomb.png';
-var img10 = new Image();
-img10.src = './UI/bomb.png';
-var img11 = new Image();
-img11.src = './UI/noBomb.png';
-
-window.onload = ()=>{
-	let canv = document.getElementById('playfield');
-	let ctx = canv.getContext('2d');
-	let field;
-	let overlay;
-	let gameOn;
-	let gameWidth;
-	let gameHeight;
-	let bombCount;
-	let firstRound;
-	gameStart(9,9,10);
-
-	document.getElementById('bgr').onclick = ()=>{
-		gameStart(9,9,10);
-	};
-
-	document.getElementById('itr').onclick = ()=>{
-		gameStart(16,16,40);
-	};
-
-	document.getElementById('exp').onclick = ()=>{
-		gameStart(30,16,99);
-	};
-
-	canv.addEventListener('click',()=>{
-		if(gameOn){
-			let rect = canv.getBoundingClientRect();
-			let mouseX = event.clientX - rect.left;
-			let mouseY = event.clientY - rect.top;
-			let cellX = Math.floor(mouseX / 30);
-			let cellY = Math.floor(mouseY / 30);
-			if(field[cellX][cellY] === 9 && !firstRound){
-				field[cellX][cellY] = 10;
-				overlay[cellX][cellY] = 1;
-				gameEnd();
-			}
-			else if(firstRound && field[cellX][cellY] !== 0){
-				let rep = 0;
-				while(rep < 1){
-					setupField();
-					if(field[cellX][cellY] === 0){
-						rep++;
-					}
-				}
-				sweeper(cellX,cellY);
-			}
-			else{
-				sweeper(cellX,cellY);
-			}
-			firstRound = false;
-			drawCanvas();
-		}
-	});
-
-	canv.addEventListener('contextmenu',(e)=>{
-		e.preventDefault();
-		if(gameOn){
-			let rect = canv.getBoundingClientRect();
-			let mouseX = event.clientX - rect.left;
-			let mouseY = event.clientY - rect.top;
-			let cellX = Math.floor(mouseX / 30);
-			let cellY = Math.floor(mouseY / 30);
-			switch(overlay[cellX][cellY]){
-				case 0:
-					overlay[cellX][cellY] = 2;
-					break;
-				case 2:
-					overlay[cellX][cellY] = 0;
-					break;
-			}
-			drawCanvas();	
-		}
-	});	
-
-	function setupField(){
-		let bombCountCopy = bombCount;
-		field = [];
-		overlay = [];
-		for(let i = 0; i<gameWidth; i++){
-			field[i] = [];
-			overlay[i] = [];
-			for(let j = 0; j<gameHeight; j++){
-				field[i][j] = 0;
-				overlay[i][j] = 0;
-			}
-		}
-		while(bombCountCopy > 0){
-			let x = Math.floor(Math.random() * gameWidth);
-			let y = Math.floor(Math.random() * gameHeight);
-			if(field[x][y] === 0){
-				field[x][y] = 9;
-				bombCountCopy--;
-			}
-		}
-		for(let i = 0; i<gameWidth; i++){
-			for(let j = 0; j<gameHeight; j++){
-				let surrBomb = 0;
-				if(field[i][j] === 0){
-					surrBomb += checkSurr(i,j,0,-1);
-					surrBomb += checkSurr(i,j,0,1);
-					surrBomb += checkSurr(i,j,-1,-1);
-					surrBomb += checkSurr(i,j,-1,1);
-					surrBomb += checkSurr(i,j,1,-1);
-					surrBomb += checkSurr(i,j,1,1);
-					surrBomb += checkSurr(i,j,-1,0);
-					surrBomb += checkSurr(i,j,1,0);
-					field[i][j] = surrBomb;
-				}
-			}
-		}
-	}
-
-	function drawCanvas(){
-		for(let i = 0; i<gameHeight; i++){
-			for(let j = 0; j<gameWidth; j++){
-				let currImg;
-				if(overlay[j][i] === 0){
-					currImg = imgBlank;
-				}
-				else if(overlay[j][i] === 1){					
-					currImg = window['img' + field[j][i]];
-				}
-				else{
-					currImg = imgFlag;
-				}
-				ctx.drawImage(currImg,j*30,i*30,30,30);
-			}
-		}
-	}
-
-	function checkSurr(i,j,xp,yp){
-		if(field[i+xp] !== undefined){
-			if(field[i+xp][j+yp] === 9){
-				return 1;
-			}
-		}
-		return 0;
-	}
-
-	function sweeper(mouseX,mouseY){
-		if(field[mouseX] !== undefined){			
-			if(field[mouseX][mouseY] === 0 && overlay[mouseX][mouseY] === 0){
-				overlay[mouseX][mouseY] = 1;
-				sweeper(mouseX+1,mouseY);
-				sweeper(mouseX,mouseY+1);
-				sweeper(mouseX-1,mouseY);
-				sweeper(mouseX,mouseY-1);
-				sweeper(mouseX-1,mouseY-1);
-				sweeper(mouseX+1,mouseY-1);
-				sweeper(mouseX-1,mouseY+1);
-				sweeper(mouseX+1,mouseY+1);
-			}
-			else if(field[mouseX][mouseY] > 0 && field[mouseX][mouseY] < 9 && overlay[mouseX][mouseY] === 0){
-				overlay[mouseX][mouseY] = 1;
-			}
-		}
-	}
-
-	function gameEnd(){
-		for(let i = 0; i<gameWidth; i++){
-			for(let j = 0; j<gameHeight; j++){
-				if(field[i][j] === 9 && overlay[i][j] !== 2){
-					overlay[i][j] = 1;
-				}
-				else if(overlay[i][j] === 2 && field[i][j] !== 9){
-					overlay[i][j] = 1;
-					field[i][j] = 11;
-				}
-			}
-		}
-		gameOn = false;
-	}
-
-	function gameStart(x,y,z){
-		firstRound = true;
-		gameWidth = x;
-		gameHeight = y;
-		bombCount = z;
-		canv.width = gameWidth*30;
-		canv.height = gameHeight*30;
-		setupField();
-		drawCanvas();
-		gameOn = true;
-	}
+// DECALRATIONS
+const images = [];
+const canv = document.getElementById('playfield');
+const ctx = canv.getContext('2d');
+const TileState = {
+  COVERED: 0,
+  MARKED: 1,
+  UNCOVERED: 2,
+  EXPLODED: 3
 };
+
+let gameField = [];
+let width;
+let height;
+let bombs;
+let found;
+let gameOver;
+let firstRound;
+
+// IMAGE LOADER
+{
+  let loaded = 0;
+
+  for (let i = 0; i < 14; i++) {
+    const newImg = new Image();
+    newImg.src = `UI/${i}.png`;
+    images.push(newImg);
+    newImg.onload = () => {
+      if (++loaded === 14) imageLoadCallback();
+    };
+  }
+}
+
+function imageLoadCallback() {
+
+  // GAME BOOTSTRAP
+  initGame(9, 9, 10);
+
+  // BUTTON LISTENERS
+  document.getElementById('bgr').onclick = () => initGame(9, 9, 10);
+  document.getElementById('itr').onclick = () => initGame(16, 16, 40);
+  document.getElementById('exp').onclick = () => initGame(30, 16, 99);
+
+  // CANVAS LISTENERS
+  canv.addEventListener('click', e => {
+    if (gameOver) return;
+
+    const mousePos = getMouseCoords(e);
+    if (firstRound) {
+      firstRound = false;
+      while (gameField[mousePos.x][mousePos.y].bomb || gameField[mousePos.x][mousePos.y].count > 0) {
+        setupField();
+      }
+    }
+
+    if (gameField[mousePos.x][mousePos.y].bomb) {
+      gameField[mousePos.x][mousePos.y].state = TileState.EXPLODED;
+      drawCanvas(true);
+      gameOver = true;
+      return;
+    }
+
+    sweep(mousePos.x, mousePos.y);
+    drawCanvas();
+  });
+
+  canv.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    if (gameOver) return;
+
+    const mousePos = getMouseCoords(e);
+    if (gameField[mousePos.x][mousePos.y].state === TileState.COVERED) {
+      gameField[mousePos.x][mousePos.y].state = TileState.MARKED;
+      if (gameField[mousePos.x][mousePos.y].bomb) found++;
+    } else if (gameField[mousePos.x][mousePos.y].state === TileState.MARKED) {
+      gameField[mousePos.x][mousePos.y].state = TileState.COVERED;
+      if (gameField[mousePos.x][mousePos.y].bomb) found--;
+    }
+
+    firstRound = false;
+    drawCanvas();
+
+    if (found === bombs) endGame();
+  });
+
+  // NEW GAME INITIALIZATION
+  function initGame(x, y, bombCount) {
+
+    // SETUP CANVAS AND GLOBAL VARIABLES
+    canv.width = x * 30;
+    canv.height = y * 30;
+    width = x;
+    height = y;
+    bombs = bombCount;
+    found = 0;
+    gameOver = false;
+    firstRound = true;
+
+    setupField();
+    drawCanvas();
+  }
+
+  function setupField() {
+
+    // SETUP EMPTY GAME FIELD
+    gameField = [];
+    for (let i = 0; i < width; i++) {
+      gameField.push([]);
+      for (let j = 0; j < height; j++) {
+        gameField[i].push({
+          count: 0,
+          state: TileState.COVERED,
+          bomb: false
+        });
+      }
+    }
+
+    // PLACE BOMBS
+    let placed = 0;
+    while (placed < bombs) {
+      const x = Math.floor(Math.random() * width);
+      const y = Math.floor(Math.random() * height);
+      if (!gameField[x][y].bomb) {
+        gameField[x][y].bomb = true;
+        increaseCount(x, y);
+        placed++;
+      }
+    }
+  }
+
+  // DRAW TILES INTO CANVAS
+  function drawCanvas(showBombs = false) {
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        switch (gameField[x][y].state) {
+          case TileState.COVERED:
+            if (showBombs && gameField[x][y].bomb) {
+              ctx.drawImage(images[13], x * 30, y * 30, 30, 30);
+              break;
+            }
+            ctx.drawImage(images[9], x * 30, y * 30, 30, 30);
+            break;
+          case TileState.MARKED:
+            if (showBombs && !gameField[x][y].bomb) {
+              ctx.drawImage(images[12], x * 30, y * 30, 30, 30);
+              break;
+            }
+            ctx.drawImage(images[11], x * 30, y * 30, 30, 30);
+            break;
+          case TileState.UNCOVERED:
+            if (!gameField[x][y].bomb) {
+              ctx.drawImage(images[gameField[x][y].count], x * 30, y * 30, 30, 30);
+            } else {
+              ctx.drawImage(images[13], x * 30, y * 30, 30, 30);
+            }
+            break;
+          case TileState.EXPLODED:
+            ctx.drawImage(images[10], x * 30, y * 30, 30, 30);
+            break;
+        }
+      }
+    }
+  }
+
+  // UNCOVER SURROUNDING TILES
+  function sweep(x, y) {
+    if (
+      x > -1 && x < width &&
+      y > -1 && y < height &&
+      gameField[x][y].state !== TileState.UNCOVERED
+    ) {
+      gameField[x][y].state = TileState.UNCOVERED;
+      if (gameField[x][y].count > 0) return;
+      sweep(x + 1, y);
+      sweep(x - 1, y);
+      sweep(x, y + 1);
+      sweep(x, y - 1);
+      sweep(x + 1, y + 1);
+      sweep(x + 1, y - 1);
+      sweep(x - 1, y + 1);
+      sweep(x - 1, y - 1);
+    }
+  }
+
+  // INCREASE BOMB COUNT IN SURROUNDING TILES
+  function increaseCount(x, y) {
+    tryIncrease(x + 1, y);
+    tryIncrease(x - 1, y);
+    tryIncrease(x, y + 1);
+    tryIncrease(x, y - 1);
+    tryIncrease(x + 1, y + 1);
+    tryIncrease(x + 1, y - 1);
+    tryIncrease(x - 1, y + 1);
+    tryIncrease(x - 1, y - 1);
+
+    function tryIncrease(x, y) {
+      if (x > -1 && x < width && y > -1 && y < height) {
+        gameField[x][y].count++;
+      }
+    }
+  }
+
+  // DRAW END SCREEN
+  function endGame() {
+    gameOver = true;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.fillRect(0, 0, canv.width, canv.height);
+    ctx.font = 'bold 45px Arial';
+    ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgb(255, 27, 27)';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+		ctx.shadowOffsetX = 2;
+		ctx.shadowOffsetY = 2;
+		ctx.shadowBlur = 2;
+    ctx.fillText('YOU WIN!', canv.width / 2, canv.height / 2);
+  }
+
+  // GET MOUSE COORDINATES ON GAME FIELD
+  function getMouseCoords(e) {
+    const rect = canv.getBoundingClientRect();
+    return {
+      x: Math.floor((e.clientX - rect.left) / 30),
+      y: Math.floor((e.clientY - rect.top) / 30)
+    };
+  }
+}
