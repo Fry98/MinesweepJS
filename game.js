@@ -208,7 +208,7 @@ function imageLoadCallback() {
     ctx.font = 'bold 45px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgb(255, 27, 27)';
+    ctx.fillStyle = 'white';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
